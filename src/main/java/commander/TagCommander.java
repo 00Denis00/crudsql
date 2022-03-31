@@ -16,8 +16,9 @@ public class TagCommander
     {
         System.out.println("Enter id: ");
         Integer id = scanner.nextInt();
-        String str = tagController.getById(id);
-        System.out.println("Tag: " + str);
+        Tag tag = tagController.getById(id);
+        String name = tag.getName();
+        System.out.println("Tag " + id + ": " + name);
         System.out.println();
     }
     public void check()
@@ -38,11 +39,14 @@ public class TagCommander
     }
     public void getAll()
     {
-        List<String> res = tagController.getAll();
-        for(int i = 0; i < res.size(); i++)
+        List<Tag> tags = tagController.getAll();
+        for(int i = 0; i < tags.size(); i++)
         {
-            String str = res.get(i);
-            System.out.println(str);
+            Tag tag = tags.get(i);
+            int id = tag.getId();
+            String name = tag.getName();
+            String result = "Id: " + id + "   Name: " + name;
+            System.out.println(result);
         }
     }
     public void save()

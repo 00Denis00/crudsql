@@ -3,31 +3,20 @@ package repository;
 import model.Post;
 import model.Tag;
 import model.Writer;
+import utils.JdbcUtils;
 
 import java.sql.*;
 import java.util.*;
 
-public interface WriterRepository
+public interface WriterRepository extends GenericRepository <Writer, Integer>
 {
-    static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    static final String DATABASE_URL = "jdbc:mysql://localhost/BD";
-
-    static final String USER = "root";
-    static final String PASSWORD = "den2701";
-
     public default List<Writer> getAll()
     {
         //Выводит все элементы файла
-        try
+        try (Statement statement = JdbcUtils.getStatement())
         {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
-
             String sql;
+
             List<Integer> ids = new ArrayList<>();
             List<Writer> writers = new ArrayList<>();
 
@@ -101,9 +90,8 @@ public interface WriterRepository
 
                 writers.add(writer);
             }
+
             rs.close();
-            statement.close();
-            connection.close();
 
             return writers;
         } catch (Exception e)
@@ -116,18 +104,11 @@ public interface WriterRepository
     public default void save(Writer writer)
     {
         //Создает элемент
-        try
+        try (Statement statement = JdbcUtils.getStatement())
         {
             int id = writer.getId();
             String name = writer.getName();
             List<Post> posts = writer.getPosts();
-
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
 
             String sql;
 
@@ -155,9 +136,6 @@ public interface WriterRepository
                     statement.executeUpdate(sql);
                 }
             }
-
-            statement.close();
-            connection.close();
         }
         catch (Exception e)
         {
@@ -168,16 +146,9 @@ public interface WriterRepository
     public default Writer getById(Integer id)
     {
         //Показывает элемент по ID
-        try
+        try (Statement statement = JdbcUtils.getStatement())
         {
             Writer writer = new Writer();
-
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
 
             String sql;
 
@@ -236,8 +207,6 @@ public interface WriterRepository
             writer.setName(writerName);
             writer.setPosts(result);
             rs.close();
-            statement.close();
-            connection.close();
 
             return writer;
         } catch (Exception e)
@@ -250,16 +219,9 @@ public interface WriterRepository
     public default void deleteById(Integer id)
     {
         //Удаляет элемент по ID
-        try
+        try (Statement statement = JdbcUtils.getStatement())
         {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
-
-            String sql;
+           String sql;
 
             sql = "SELECT * FROM writerPost WHERE writerId = " + id + ";";
             ResultSet rs = statement.executeQuery(sql);
@@ -283,9 +245,6 @@ public interface WriterRepository
 
             sql = "DELETE FROM writer WHERE Id = " + id + ";";
             statement.executeUpdate(sql);
-
-            statement.close();
-            connection.close();
         } catch (Exception e)
         {
             System.out.println(e);

@@ -21,9 +21,28 @@ public class PostCommander
     {
         System.out.println("Enter id: ");
         Integer id = scanner.nextInt();
-        String result = postController.getById(id);
-        System.out.println(result);
-        System.out.println();
+        Post post = postController.getById(id);
+        String fname = post.getFirstName();
+        String lname = post.getLastName();
+        List<Tag> tags = post.getTags();
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        for(int i = 0; i < tags.size(); i++)
+        {
+            Tag tag = tags.get(i);
+            builder.append("(");
+            builder.append("Id: ");
+            builder.append(tag.getId());
+            builder.append(" ; ");
+            builder.append("Name: ");
+            builder.append(tag.getName());
+            builder.append(")");
+        }
+        builder.append("]");
+        String result = builder.toString();
+        System.out.println("First name: " + fname);
+        System.out.println("Last name: " + lname);
+        System.out.println("Tags: " + result);
     }
 
     public void deleteById()
@@ -37,11 +56,32 @@ public class PostCommander
 
     public void getAll()
     {
-        List<String> result = postController.getAll();
+        List<Post> result = postController.getAll();
         for(int i = 0; i < result.size(); i++)
         {
-            String res = result.get(i);
-            System.out.println(res);
+            Post post = result.get(i);
+            int id = post.getId();
+            String fname = post.getFirstName();
+            String lname = post.getLastName();
+            List<Tag> tags = post.getTags();
+            StringBuilder builder = new StringBuilder();
+            builder.append("[");
+            for(int j = 0; j < tags.size(); j++)
+            {
+                Tag tag = tags.get(j);
+                builder.append("(");
+                builder.append("Id: ");
+                builder.append(tag.getId());
+                builder.append(" ; ");
+                builder.append("Name: ");
+                builder.append(tag.getName());
+                builder.append(")");
+            }
+            builder.append("]");
+            String res = builder.toString();
+            System.out.println("First name: " + fname);
+            System.out.println("Last name: " + lname);
+            System.out.println("Tags: " + res);
             System.out.println();
         }
     }

@@ -2,29 +2,18 @@ package repository;
 
 import model.Post;
 import model.Tag;
+import utils.JdbcUtils;
 
 import java.sql.*;
 import java.util.*;
 
-public interface PostRepository
+public interface PostRepository extends GenericRepository <Post, Integer>
 {
-    static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    static final String DATABASE_URL = "jdbc:mysql://localhost/BD";
-
-    static final String USER = "root";
-    static final String PASSWORD = "den2701";
-
-    public default List<String> getAll()
+    public default List<Post> getAll()
     {
         //Выводит все элементы файла
-        try {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
-
+        try (Statement statement = JdbcUtils.getStatement())
+        {
             String sql;
 
             sql = "SELECT * FROM post;";
@@ -38,7 +27,7 @@ public interface PostRepository
                 list.add(x);
             }
 
-            List<String> result = new ArrayList<>();
+            List<Post> result = new ArrayList<>();
 
             for (int i = 0; i < list.size(); i++)
             {
@@ -57,25 +46,31 @@ public interface PostRepository
                 sql = "SELECT * FROM ptags WHERE userId = " + id + ";";
                 rs = statement.executeQuery(sql);
 
-                StringBuilder builder = new StringBuilder();
+                List<Tag> tags = new ArrayList<>();
 
-                while (rs.next()) {
+                while (rs.next())
+                {
                     String name = rs.getString("Name");
                     int ide = rs.getInt("Id");
-                    builder.append("(Id: ");
-                    builder.append(ide);
-                    builder.append(" ; Name: ");
-                    builder.append(name);
-                    builder.append(") ");
+
+                    Tag tag = new Tag();
+
+                    tag.setName(name);
+                    tag.setId(ide);
+
+                    tags.add(tag);
                 }
-                String res = builder.toString();
-                String line = "Id: " + id + "\nFirst name: " + fname + "\nLast name: " + lname + "\nTags: " + res;
-                result.add(line);
+                Post post = new Post();
+
+                post.setId(id);
+                post.setFirstName(fname);
+                post.setLastName(lname);
+                post.setTags(tags);
+
+                result.add(post);
             }
 
             rs.close();
-            connection.close();
-            statement.close();
 
             return result;
         }
@@ -86,16 +81,12 @@ public interface PostRepository
         }
     }
 
-    public default String getById(Integer id)
+    public default Post getById(Integer id)
     {
         //Показывает элемент по ID
-        try {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
+        try (Statement statement = JdbcUtils.getStatement())
+        {
+            Post post = new Post();
 
             String sql;
 
@@ -114,26 +105,29 @@ public interface PostRepository
             sql = "SELECT * FROM ptags WHERE userId = " + id + ";";
             rs = statement.executeQuery(sql);
 
-            StringBuilder builder = new StringBuilder();
+            List<Tag> tags = new ArrayList<>();
 
             while (rs.next())
             {
                 String name = rs.getString("Name");
                 int i = rs.getInt("Id");
-                builder.append("(Id: ");
-                builder.append(i);
-                builder.append(" ; Name: ");
-                builder.append(name);
-                builder.append(") ");
+
+                Tag tag = new Tag();
+
+                tag.setName(name);
+                tag.setId(i);
+
+                tags.add(tag);
             }
-            String res = builder.toString();
+
+            post.setId(id);
+            post.setFirstName(fname);
+            post.setLastName(lname);
+            post.setTags(tags);
 
             rs.close();
-            connection.close();
-            statement.close();
 
-            String result = "First name: " + fname + "\nLast name: " + lname + "\nTags: " + res;
-            return result;
+            return post;
         }
         catch (Exception e)
         {
@@ -145,18 +139,12 @@ public interface PostRepository
     public default void save(Post post)
     {
         //Создает элемент
-        try {
+        try (Statement statement = JdbcUtils.getStatement())
+        {
             String firstName = post.getFirstName();
             String lastName = post.getLastName();
             int id = post.getId();
             List<Tag> tags = post.getTags();
-
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
 
             String sql;
 
@@ -170,9 +158,6 @@ public interface PostRepository
                 sql = "insert into ptags (Id, Name, userId) values ('" + ide + "', '" + name + "', '" + id + "');";
                 statement.executeUpdate(sql);
             }
-
-            statement.close();
-            connection.close();
         }
         catch (Exception e)
         {
@@ -183,24 +168,14 @@ public interface PostRepository
     public default void deleteById(Integer id)
     {
         //Удаляет элемент по ID
-        try
+        try (Statement statement = JdbcUtils.getStatement())
         {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
-
             String sql;
 
             sql = "DELETE FROM post WHERE Id = " + id + ";";
             statement.executeUpdate(sql);
             sql = "DELETE FROM ptags WHERE userId = " + id + ";";
             statement.executeUpdate(sql);
-
-            statement.close();
-            connection.close();
         } catch (Exception e) {
             System.out.println(e);
         }

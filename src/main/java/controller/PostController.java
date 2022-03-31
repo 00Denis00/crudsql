@@ -8,18 +8,18 @@ import java.util.List;
 public class PostController
 {
     PostRepository postRepository = new PostRepository(){};
-    public String getById(Integer id)
+    public Post getById(Integer id)
     {
-        String result = postRepository.getById(id);
-        return result;
+        Post post = postRepository.getById(id);
+        return post;
     }
     public void deleteById(Integer id)
     {
         postRepository.deleteById(id);
     }
-    public List<String> getAll()
+    public List<Post> getAll()
     {
-        List<String> result = postRepository.getAll();
+        List<Post> result = postRepository.getAll();
         return result;
     }
     public void save(Post post)

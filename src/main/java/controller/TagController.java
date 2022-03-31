@@ -10,10 +10,10 @@ import java.util.Scanner;
 public class TagController
 {
     TagRepository tagRepository = new TagRepository(){};
-    public String getById(Integer id)
+    public Tag getById(Integer id)
     {
-        String str = tagRepository.getById(id);
-        return str;
+        Tag tag = tagRepository.getById(id);
+        return tag;
     }
     public TagStatus check(Integer id)
     {
@@ -24,9 +24,10 @@ public class TagController
     {
         tagRepository.deleteById(id);
     }
-    public List<String> getAll()
+    public List<Tag> getAll()
     {
-        return tagRepository.getAll();
+        List<Tag> tags = tagRepository.getAll();
+        return tags;
     }
     public void save(Tag tag)
     {

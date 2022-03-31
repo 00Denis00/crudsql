@@ -1,6 +1,7 @@
 import commander.PostCommander;
 import commander.TagCommander;
 import commander.WriterCommander;
+import utils.JdbcUtils;
 
 import java.util.Scanner;
 
@@ -164,6 +165,7 @@ public class main {
             }
             else if(select.equals("END"))
             {
+                JdbcUtils.closeConnection();
                 end++;
             }
             else

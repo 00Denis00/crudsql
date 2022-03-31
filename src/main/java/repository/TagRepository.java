@@ -2,32 +2,22 @@ package repository;
 
 import model.Tag;
 import model.TagStatus;
+import utils.JdbcUtils;
 
 import java.io.*;
 import java.sql.*;
 import java.util.*;
 
-public interface TagRepository {
-    static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    static final String DATABASE_URL = "jdbc:mysql://localhost/BD";
-
-    static final String USER = "root";
-    static final String PASSWORD = "den2701";
-
+public interface TagRepository extends GenericRepository <Tag, Integer>
+{
     TagStatus deleted = TagStatus.DELETED;
     TagStatus active = TagStatus.ACTIVE;
 
     public default TagStatus check(Integer id)
     {
         //Проверяет элемент по ID
-        try {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
-
+        try (Statement statement = JdbcUtils.getStatement())
+        {
             boolean check = false;
             String sql;
 
@@ -44,8 +34,6 @@ public interface TagRepository {
             }
 
             rs.close();
-            connection.close();
-            statement.close();
 
             if(check == false)
             {
@@ -63,51 +51,41 @@ public interface TagRepository {
         }
     }
 
-    public default String getById(Integer id)
+    public default Tag getById(Integer id)
     {
         //Показывает элемент по ID
-        try {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
+        try (Statement statement = JdbcUtils.getStatement())
+        {
+            Tag tag = new Tag();
 
             String sql;
 
             sql = "SELECT * FROM tag WHERE Id = " + id + ";";
             ResultSet rs = statement.executeQuery(sql);
 
-            String str = "";
+            String name = "";
             while (rs.next()) {
-                str = rs.getString("Name");
+                name = rs.getString("Name");
             }
 
-            rs.close();
-            connection.close();
-            statement.close();
+            tag.setId(id);
+            tag.setName(name);
 
-            return str;
+            rs.close();
+
+            return tag;
         } catch (Exception e) {
             System.out.println(e);
             return null;
         }
     }
 
-    public default List<String> getAll()
+    public default List<Tag> getAll()
     {
         //Выводит все элементы файла
-        try
+        try (Statement statement = JdbcUtils.getStatement())
         {
-            List<String> res = new ArrayList<String>();
-
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
+            List<Tag> tags = new ArrayList<>();
 
             String sql;
 
@@ -119,15 +97,17 @@ public interface TagRepository {
                 int id = rs.getInt("Id");
                 String name = rs.getString("Name");
 
-                String str = "Id: " + id + "     Name: " + name;
-                res.add(str);
+                Tag tag = new Tag();
+
+                tag.setId(id);
+                tag.setName(name);
+
+                tags.add(tag);
             }
 
             rs.close();
-            connection.close();
-            statement.close();
 
-            return res;
+            return tags;
         }
         catch (Exception e)
         {
@@ -138,24 +118,15 @@ public interface TagRepository {
 
     public default void save(Tag tag) {
         //Создает элемент
-        try {
+        try (Statement statement = JdbcUtils.getStatement())
+        {
             String name = tag.getName();
             int id = tag.getId();
-
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
 
             String sql;
 
             sql = "insert into tag (Id, Name) values ('" + id + "', '" + name + "');";
             statement.executeUpdate(sql);
-
-            statement.close();
-            connection.close();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -163,21 +134,12 @@ public interface TagRepository {
 
     public default void deleteById(Integer id) {
         //Удаляет элемент по ID
-        try {
-            Connection connection = null;
-            Statement statement = null;
-
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
-
+        try (Statement statement = JdbcUtils.getStatement())
+        {
             String sql;
 
             sql = "DELETE FROM tag WHERE Id = " + id + ";";
             statement.executeUpdate(sql);
-
-            statement.close();
-            connection.close();
         } catch (Exception e) {
             System.out.println(e);
         }
