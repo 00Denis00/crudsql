@@ -47,4 +47,3 @@ Create table If Not Exists BD.postTag
 	Id int, 
 	Name varchar(255)
 );
-SELECT * FROM tag;
