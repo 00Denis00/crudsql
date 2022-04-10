@@ -2,14 +2,13 @@ package controller;
 
 import model.Tag;
 import model.TagStatus;
-import repository.TagRepository;
+import repository.Jdbc.JdbcTagRepositoryImpl;
 
 import java.util.List;
-import java.util.Scanner;
 
 public class TagController
 {
-    TagRepository tagRepository = new TagRepository(){};
+    JdbcTagRepositoryImpl tagRepository = new JdbcTagRepositoryImpl(){};
     public Tag getById(Integer id)
     {
         Tag tag = tagRepository.getById(id);
@@ -32,5 +31,9 @@ public class TagController
     public void save(Tag tag)
     {
         tagRepository.save(tag);
+    }
+    public void update(Tag tag)
+    {
+        tagRepository.update(tag);
     }
 }

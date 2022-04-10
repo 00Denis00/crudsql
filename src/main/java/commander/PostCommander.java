@@ -12,18 +12,16 @@ import java.util.*;
 
 public class PostCommander
 {
-    public static final String ANSI_BLUE = "\u001B[38;5;33m";
-    public static final String ANSI_RESET = "\u001B[0m";
-    Scanner scanner = new Scanner(System.in);
+    Scanner StrScanner = new Scanner(System.in);
+    Scanner IntScanner = new Scanner(System.in);
     PostController postController = new PostController();
 
     public void getById()
     {
         System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
+        Integer id = IntScanner.nextInt();
         Post post = postController.getById(id);
-        String fname = post.getFirstName();
-        String lname = post.getLastName();
+        String content = post.getContent();
         List<Tag> tags = post.getTags();
         StringBuilder builder = new StringBuilder();
         builder.append("[");
@@ -40,17 +38,32 @@ public class PostCommander
         }
         builder.append("]");
         String result = builder.toString();
-        System.out.println("First name: " + fname);
-        System.out.println("Last name: " + lname);
+        System.out.println("Content: " + content);
         System.out.println("Tags: " + result);
     }
 
     public void deleteById()
     {
         System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
+        Integer id = IntScanner.nextInt();
         postController.deleteById(id);
         System.out.println("Post " + id + " was deleted");
+        System.out.println();
+    }
+
+    public void update()
+    {
+        Post post = new Post();
+
+        System.out.println("Enter new content: ");
+        String content = StrScanner.nextLine();
+        post.setContent(content);
+
+        System.out.println("Enter id: ");
+        Integer id = IntScanner.nextInt();
+        post.setId(id);
+
+        postController.update(post);
         System.out.println();
     }
 
@@ -61,8 +74,7 @@ public class PostCommander
         {
             Post post = result.get(i);
             int id = post.getId();
-            String fname = post.getFirstName();
-            String lname = post.getLastName();
+            String content = post.getContent();
             List<Tag> tags = post.getTags();
             StringBuilder builder = new StringBuilder();
             builder.append("[");
@@ -78,10 +90,10 @@ public class PostCommander
                 builder.append(")");
             }
             builder.append("]");
-            String res = builder.toString();
-            System.out.println("First name: " + fname);
-            System.out.println("Last name: " + lname);
-            System.out.println("Tags: " + res);
+            String build = builder.toString();
+            System.out.println("Id: " + id);
+            System.out.println("Content: " + content);
+            System.out.println("Tags: " + build);
             System.out.println();
         }
     }
@@ -89,99 +101,13 @@ public class PostCommander
     public void save()
     {
         Post post = new Post();
-        int x = 0;
-        List<Tag> tags = new ArrayList<>();
-        System.out.println(ANSI_BLUE + "Write \"new\" to create a new tag in list of tags" + ANSI_RESET);
-        System.out.println(ANSI_BLUE + "Write \"continue\" to move to the next step" + ANSI_RESET);
-        System.out.println();
-        while(x == 0)
-        {
-            String str = scanner.nextLine();
-            if(str.equals("new"))
-            {
-                Tag tag = new Tag();
-                Scanner scr = new Scanner(System.in);
-                System.out.println("Enter id: ");
-                Integer id = scanner.nextInt();
-                tag.setId(id);
-                System.out.println("Enter name: ");
-                String name = scr.nextLine();
-                tag.setName(name);
-                tags.add(tag);
-                System.out.println("Tag was saved");
-                System.out.println();
-                System.out.println(ANSI_BLUE + "Write \"new\" to create a new tag in list of tags" + ANSI_RESET);
-                System.out.println(ANSI_BLUE + "Write \"continue\" to move to the next step" + ANSI_RESET);
-                System.out.println();
-            }
-            else if(str.equals("continue"))
-            {
-                post.setTags(tags);
-                x++;
-                System.out.println();
-            }
-        }
-        System.out.println("Enter first name: ");
-        String fname = scanner.nextLine();
-        post.setFirstName(fname);
-        System.out.println("Enter last name: ");
-        String lname = scanner.nextLine();
-        post.setLastName(lname);
-        System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
-        post.setId(id);
+        System.out.println("Enter content: ");
+        String content = StrScanner.nextLine();
+        post.setContent(content);
+        System.out.println("Enter writer id: ");
+        Integer writerId = IntScanner.nextInt();
+        post.setWriterId(writerId);
         postController.save(post);
-        System.out.println("Post was saved");
-        System.out.println();
-    }
-
-    public void update()
-    {
-        Post post = new Post();
-        int x = 0;
-        List<Tag> tags = new ArrayList<>();
-        System.out.println(ANSI_BLUE + "Write \"new\" to create new tag" + ANSI_RESET);
-        System.out.println(ANSI_BLUE + "Write \"continue\" to move to the next step" + ANSI_RESET);
-        System.out.println();
-        while(x == 0)
-        {
-            String str = scanner.nextLine();
-            if(str.equals("new"))
-            {
-                Tag tag = new Tag();
-                Scanner scr = new Scanner(System.in);
-                System.out.println("Enter id: ");
-                Integer id = scanner.nextInt();
-                tag.setId(id);
-                System.out.println("Enter name: ");
-                String name = scr.nextLine();
-                tag.setName(name);
-                tags.add(tag);
-                System.out.println("New tag was saved");
-                System.out.println();
-                System.out.println(ANSI_BLUE + "Write \"new\" to create a new tag in list of tags" + ANSI_RESET);
-                System.out.println(ANSI_BLUE + "Write \"continue\" to move to the next step" + ANSI_RESET);
-                System.out.println();
-            }
-            else if(str.equals("continue"))
-            {
-                post.setTags(tags);
-                x++;
-                System.out.println();
-            }
-        }
-        System.out.println("Enter new first name: ");
-        String fname = scanner.nextLine();
-        post.setFirstName(fname);
-        System.out.println("Enter new last name: ");
-        String lname = scanner.nextLine();
-        post.setLastName(lname);
-        System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
-        post.setId(id);
-        postController.deleteById(id);
-        postController.save(post);
-        System.out.println("Post " + id + " was updated");
         System.out.println();
     }
 }

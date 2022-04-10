@@ -1,13 +1,13 @@
 package controller;
 
 import model.Post;
-import repository.PostRepository;
+import repository.Jdbc.JdbcPostRepositoryImpl;
 
 import java.util.List;
 
 public class PostController
 {
-    PostRepository postRepository = new PostRepository(){};
+    JdbcPostRepositoryImpl postRepository = new JdbcPostRepositoryImpl(){};
     public Post getById(Integer id)
     {
         Post post = postRepository.getById(id);
@@ -25,5 +25,9 @@ public class PostController
     public void save(Post post)
     {
         postRepository.save(post);
+    }
+    public void update(Post post)
+    {
+        postRepository.update(post);
     }
 }

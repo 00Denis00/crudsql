@@ -18,5 +18,7 @@ public interface GenericRepository <T, ID>
 
     void save(T t);
 
+    void update(T t);
+
     void deleteById(ID id);
 }

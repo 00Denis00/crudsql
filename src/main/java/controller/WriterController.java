@@ -1,13 +1,13 @@
 package controller;
 
 import model.Writer;
-import repository.WriterRepository;
+import repository.Jdbc.JdbcWriterRepositoryImpl;
 
 import java.util.List;
 
 public class WriterController
 {
-    WriterRepository writerRepository = new WriterRepository(){};
+    JdbcWriterRepositoryImpl writerRepository = new JdbcWriterRepositoryImpl(){};
     public void deleteById(Integer id)
     {
         writerRepository.deleteById(id);
@@ -21,6 +21,10 @@ public class WriterController
     {
         List<Writer> writers = writerRepository.getAll();
         return writers;
+    }
+    public void update(Writer writer)
+    {
+        writerRepository.update(writer);
     }
     public void save(Writer writer)
     {

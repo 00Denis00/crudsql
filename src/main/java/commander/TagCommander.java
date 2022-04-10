@@ -9,13 +9,14 @@ import java.util.Scanner;
 
 public class TagCommander
 {
-    Scanner scanner = new Scanner(System.in);
+    Scanner StrScanner = new Scanner(System.in);
+    Scanner IntScanner = new Scanner(System.in);
     TagController tagController = new TagController();
 
     public void getById()
     {
         System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
+        Integer id = IntScanner.nextInt();
         Tag tag = tagController.getById(id);
         String name = tag.getName();
         System.out.println("Tag " + id + ": " + name);
@@ -24,7 +25,7 @@ public class TagCommander
     public void check()
     {
         System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
+        Integer id = IntScanner.nextInt();
         TagStatus T = tagController.check(id);
         System.out.println(T);
         System.out.println();
@@ -32,7 +33,7 @@ public class TagCommander
     public void deleteById()
     {
         System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
+        Integer id = IntScanner.nextInt();
         tagController.deleteById(id);
         System.out.println("Tag " + id + " was deleted");
         System.out.println();
@@ -53,27 +54,24 @@ public class TagCommander
     {
         Tag tag = new Tag();
         System.out.println("Enter name: ");
-        String name = scanner.nextLine();
+        String name = StrScanner.nextLine();
         tag.setName(name);
-        System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
-        tag.setId(id);
+        System.out.println("Enter post id: ");
+        Integer postId = IntScanner.nextInt();
+        tag.setPostId(postId);
         tagController.save(tag);
-        System.out.println("Tag was saved");
         System.out.println();
     }
     public void update()
     {
         Tag tag = new Tag();
         System.out.println("Enter new name: ");
-        String name = scanner.nextLine();
+        String name = StrScanner.nextLine();
         tag.setName(name);
-        System.out.println("Enter id: ");
-        Integer id = scanner.nextInt();
+        System.out.println("Enter tag id: ");
+        Integer id = IntScanner.nextInt();
         tag.setId(id);
-        tagController.deleteById(id);
-        tagController.save(tag);
-        System.out.println("Tag " + id + " was updated");
+        tagController.update(tag);
         System.out.println();
     }
 }

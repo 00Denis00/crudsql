@@ -5,9 +5,9 @@ import java.util.List;
 public class Post
 {
     private Integer id;
-    private String firstName;
-    private String lastName;
+    private String content;
     private List<Tag> tags;
+    private Integer writerId;
 
     public Integer getId() {
         return id;
@@ -17,20 +17,20 @@ public class Post
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public Integer getWriterId() {
+        return writerId;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setWriterId(Integer writerId) {
+        this.writerId = writerId;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getContent() {
+        return content;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public List<Tag> getTags() {

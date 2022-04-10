@@ -165,7 +165,13 @@ public class main {
             }
             else if(select.equals("END"))
             {
-                JdbcUtils.closeConnection();
+                try {
+                    JdbcUtils.closeConnection();
+                }
+                catch(Exception e)
+                {
+
+                }
                 end++;
             }
             else
