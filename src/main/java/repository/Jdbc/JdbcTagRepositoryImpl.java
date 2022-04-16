@@ -5,6 +5,7 @@ import model.TagStatus;
 import repository.TagRepository;
 import utils.JdbcUtils;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -12,103 +13,73 @@ import java.util.List;
 
 public class JdbcTagRepositoryImpl implements TagRepository
 {
-    TagStatus deleted = TagStatus.DELETED;
-    TagStatus active = TagStatus.ACTIVE;
 
     public TagStatus check(Integer id)
     {
-        try (Statement statement = JdbcUtils.getStatement())
+        TagStatus deleted = TagStatus.DELETED;
+        TagStatus active = TagStatus.ACTIVE;
+
+        boolean check = false;
+
+        String sql = "SELECT * FROM tags WHERE id = " + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            boolean check = false;
-            String sql;
-
-            sql = "SELECT * FROM tag WHERE Id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-
-            if(rs.next())
+            ResultSet rs = statement.executeQuery();
+            while(rs.next())
             {
                 check = true;
             }
-            else
-            {
-                check = false;
-            }
 
             rs.close();
-
-            if(check == false)
-            {
-                return deleted;
-            }
-            else
-            {
-                return active;
-            }
         }
         catch (Exception e)
         {
             System.out.println(e);
-            return null;
+        }
+
+        if(check == true)
+        {
+            return active;
+        }
+        else
+        {
+            return deleted;
         }
     }
 
     public Tag getById(Integer id)
     {
-        try (Statement statement = JdbcUtils.getStatement())
+        String name = "";
+        String sql = "SELECT * FROM tags WHERE id = " + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            Tag tag = new Tag();
-
-            String sql;
-
-            boolean check = false;
-
-            sql = "SELECT * FROM tag WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next())
+            ResultSet rs = statement.executeQuery();
+            while(rs.next())
             {
-                check = true;
+                name = rs.getString("name");
             }
 
-            if(check == true) {
-                sql = "SELECT * FROM tag WHERE Id = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                String name = "";
-                while (rs.next()) {
-                    name = rs.getString("Name");
-                }
-
-                tag.setId(id);
-                tag.setName(name);
-
-                rs.close();
-
-                return tag;
-            }
-            else
-            {
-                System.out.println("There is no post with that id!");
-                rs.close();
-                return null;
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-            return null;
+            rs.close();
         }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+
+        Tag tag = new Tag();
+        tag.setId(id);
+        tag.setName(name);
+        return tag;
     }
 
     public List<Tag> getAll()
     {
-        try (Statement statement = JdbcUtils.getStatement())
+        List<Tag> tags = new ArrayList<>();
+        String sql = "SELECT * FROM tags;";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            List<Tag> tags = new ArrayList<>();
-
-            String sql;
-
-            sql = "SELECT * FROM tag;";
-            ResultSet rs = statement.executeQuery(sql);
-
-            while (rs.next())
+            ResultSet rs = statement.executeQuery();
+            while(rs.next())
             {
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
@@ -122,121 +93,65 @@ public class JdbcTagRepositoryImpl implements TagRepository
             }
 
             rs.close();
-
-            return tags;
         }
         catch (Exception e)
         {
             System.out.println(e);
-            return null;
         }
+
+        return tags;
     }
 
-    public void save(Tag tag) {
-        try (Statement statement = JdbcUtils.getStatement())
+    public Tag save(Tag tag)
+    {
+        String name = tag.getName();
+        int id = 0;
+        String sql = "insert into tags(name) values ('" + name + "');";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            String sql;
-            sql = "SELECT * FROM post;";
-            ResultSet rs = statement.executeQuery(sql);
+            statement.executeUpdate();
 
-            List<Integer> list = new ArrayList<>();
-            while (rs.next())
+            ResultSet rs = statement.getGeneratedKeys();
+            while(rs.next())
             {
-                int id = rs.getInt("id");
-                list.add(id);
+                id = rs.getInt(1);
             }
 
-            String name = tag.getName();
-            int postId = tag.getPostId();
-            boolean coincidence = false;
-
-            for(int i = 0; i < list.size(); i++)
-            {
-                if(postId == list.get(i))
-                {
-                    coincidence = true;
-                }
-            }
-            if(coincidence == true)
-            {
-                sql = "insert into tag (name, postId) values ('" + name + "', '" + postId + "');";
-                statement.executeUpdate(sql);
-                System.out.println("Tag was saved");
-            }
-            else
-            {
-                System.out.println("There is no post with that id!");
-                System.out.println("Tag wasn't saved");
-            }
             rs.close();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             System.out.println(e);
         }
+        tag.setId(id);
+        return tag;
     }
 
-    public void update(Tag tag) {
-        try (Statement statement = JdbcUtils.getStatement())
+    public Tag update(Tag tag)
+    {
+        String name = tag.getName();
+        int id = tag.getId();
+        String sql = "UPDATE tags SET name='" + name + "' WHERE id=" + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            int id = tag.getId();
-            String name = tag.getName();
-            int postId = 0;
-
-            String sql;
-            sql = "SELECT * FROM tag WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-
-            boolean check = false;
-            while (rs.next())
-            {
-                check = true;
-                postId = rs.getInt("postId");
-            }
-
-            if(check == true) {
-                sql = "DELETE FROM tag WHERE Id = " + id + ";";
-                statement.executeUpdate(sql);
-
-                sql = "insert into tag (id, name, postId) values ('" + id + "', '" + name + "', '" + postId + "');";
-                statement.executeUpdate(sql);
-
-                System.out.println("Tag " + id + " was updated");
-            }
-            else
-            {
-                System.out.println("There is no tag with that id!");
-                System.out.println("Tag wasn't updated");
-            }
-            rs.close();
+            statement.executeUpdate();
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             System.out.println(e);
         }
+        return tag;
     }
 
-    public void deleteById(Integer id) {
-        try (Statement statement = JdbcUtils.getStatement())
+    public void deleteById(Integer id)
+    {
+        String sql = "DELETE FROM tags WHERE id = " + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            String sql;
-
-            boolean check = false;
-
-            sql = "SELECT * FROM tag WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next())
-            {
-                check = true;
-            }
-
-            if(check == true) {
-                sql = "DELETE FROM tag WHERE Id = " + id + ";";
-                statement.executeUpdate(sql);
-            }
-            else
-            {
-                System.out.println("There is no tag with that id!");
-            }
-            rs.close();
-        } catch (Exception e) {
+            statement.executeUpdate();
+        }
+        catch (Exception e)
+        {
             System.out.println(e);
         }
     }

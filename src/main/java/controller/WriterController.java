@@ -8,26 +8,25 @@ import java.util.List;
 public class WriterController
 {
     JdbcWriterRepositoryImpl writerRepository = new JdbcWriterRepositoryImpl(){};
+
     public void deleteById(Integer id)
     {
         writerRepository.deleteById(id);
     }
     public Writer getById(Integer id)
     {
-        Writer writer = writerRepository.getById(id);
-        return writer;
+        return writerRepository.getById(id);
     }
     public List<Writer> getAll()
     {
-        List<Writer> writers = writerRepository.getAll();
-        return writers;
+        return writerRepository.getAll();
     }
-    public void update(Writer writer)
+    public Writer update(Writer writer)
     {
-        writerRepository.update(writer);
+        return writerRepository.update(writer);
     }
-    public void save(Writer writer)
+    public Writer save(Writer writer)
     {
-        writerRepository.save(writer);
+        return writerRepository.save(writer);
     }
 }

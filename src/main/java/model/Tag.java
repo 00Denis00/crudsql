@@ -4,7 +4,6 @@ public class Tag
 {
     private Integer id;
     private String name;
-    private Integer postId;
 
     public Integer getId()
     {
@@ -24,15 +23,5 @@ public class Tag
     public void setName(String name)
     {
         this.name = name;
-    }
-
-    public Integer getPostId()
-    {
-        return postId;
-    }
-
-    public void setPostId(Integer postId)
-    {
-        this.postId = postId;
     }
 }

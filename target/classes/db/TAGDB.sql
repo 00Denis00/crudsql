@@ -1,23 +1,30 @@
-CREATE DATABASE IF NOT EXISTS BD;
- 
-USE BD;
+CREATE DATABASE IF NOT EXISTS db;
+USE db;
 
-Create table If Not Exists BD.tag 
+CREATE TABLE IF NOT EXISTS tags
 (
-	id int, 
-	name varchar(255),
-    postId int
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	name varchar(255)
 );
 
-Create table If Not Exists BD.post 
+CREATE TABLE IF NOT EXISTS posts
 (
-	id int, 
+	id INT PRIMARY KEY AUTO_INCREMENT,
 	content varchar(255),
-    writerId int
+    writer_id int
 );
 
-Create table If Not Exists BD.writer 
+CREATE TABLE IF NOT EXISTS post_tags
 (
-	id int, 
+    post_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    FOREIGN KEY (post_id) REFERENCES posts(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id),
+    UNIQUE (post_id, tag_id)
+);
+
+CREATE TABLE IF NOT EXISTS writers
+(
+	id INT PRIMARY KEY AUTO_INCREMENT,
 	name varchar(255)
 );

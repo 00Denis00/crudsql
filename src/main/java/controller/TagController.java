@@ -3,21 +3,21 @@ package controller;
 import model.Tag;
 import model.TagStatus;
 import repository.Jdbc.JdbcTagRepositoryImpl;
+import repository.TagRepository;
 
 import java.util.List;
 
 public class TagController
 {
-    JdbcTagRepositoryImpl tagRepository = new JdbcTagRepositoryImpl(){};
+    TagRepository tagRepository = new JdbcTagRepositoryImpl(){};
+
     public Tag getById(Integer id)
     {
-        Tag tag = tagRepository.getById(id);
-        return tag;
+        return tagRepository.getById(id);
     }
     public TagStatus check(Integer id)
     {
-        TagStatus T = tagRepository.check(id);
-        return T;
+        return tagRepository.check(id);
     }
     public void deleteById(Integer id)
     {
@@ -25,15 +25,14 @@ public class TagController
     }
     public List<Tag> getAll()
     {
-        List<Tag> tags = tagRepository.getAll();
-        return tags;
+        return tagRepository.getAll();
     }
-    public void save(Tag tag)
+    public Tag save(Tag tag)
     {
-        tagRepository.save(tag);
+        return tagRepository.save(tag);
     }
-    public void update(Tag tag)
+    public Tag update(Tag tag)
     {
-        tagRepository.update(tag);
+        return tagRepository.update(tag);
     }
 }

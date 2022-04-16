@@ -12,15 +12,16 @@ import java.util.*;
 
 public class PostCommander
 {
-    Scanner StrScanner = new Scanner(System.in);
-    Scanner IntScanner = new Scanner(System.in);
+    Scanner scanner = new Scanner(System.in);
     PostController postController = new PostController();
 
     public void getById()
     {
         System.out.println("Enter id: ");
-        Integer id = IntScanner.nextInt();
+        scanner = new Scanner(System.in);
+        Integer id = scanner.nextInt();
         Post post = postController.getById(id);
+
         String content = post.getContent();
         List<Tag> tags = post.getTags();
         StringBuilder builder = new StringBuilder();
@@ -45,7 +46,8 @@ public class PostCommander
     public void deleteById()
     {
         System.out.println("Enter id: ");
-        Integer id = IntScanner.nextInt();
+        scanner = new Scanner(System.in);
+        Integer id = scanner.nextInt();
         postController.deleteById(id);
         System.out.println("Post " + id + " was deleted");
         System.out.println();
@@ -55,24 +57,26 @@ public class PostCommander
     {
         Post post = new Post();
 
+        System.out.println("Enter post id: ");
+        scanner = new Scanner(System.in);
+        Integer id = scanner.nextInt();
+        post.setId(id);
         System.out.println("Enter new content: ");
-        String content = StrScanner.nextLine();
+        scanner = new Scanner(System.in);
+        String content = scanner.nextLine();
         post.setContent(content);
 
-        System.out.println("Enter id: ");
-        Integer id = IntScanner.nextInt();
-        post.setId(id);
-
         postController.update(post);
+        System.out.println("Id: " + id + "   Content: " + content);
         System.out.println();
     }
 
     public void getAll()
     {
-        List<Post> result = postController.getAll();
-        for(int i = 0; i < result.size(); i++)
+        List<Post> posts = postController.getAll();
+        for(int i = 0; i < posts.size(); i++)
         {
-            Post post = result.get(i);
+            Post post = posts.get(i);
             int id = post.getId();
             String content = post.getContent();
             List<Tag> tags = post.getTags();
@@ -101,13 +105,41 @@ public class PostCommander
     public void save()
     {
         Post post = new Post();
+
         System.out.println("Enter content: ");
-        String content = StrScanner.nextLine();
+        scanner = new Scanner(System.in);
+        String content = scanner.nextLine();
         post.setContent(content);
+
         System.out.println("Enter writer id: ");
-        Integer writerId = IntScanner.nextInt();
+        scanner = new Scanner(System.in);
+        int writerId = scanner.nextInt();
         post.setWriterId(writerId);
-        postController.save(post);
+
+        System.out.println();
+
+        List<Tag> tags = new ArrayList<>();
+        String command = "continue";
+        while(command.equals("continue"))
+        {
+            Tag tag = new Tag();
+            System.out.println("Enter tag id: ");
+            scanner = new Scanner(System.in);
+            int tagId = scanner.nextInt();
+            tag.setId(tagId);
+            tags.add(tag);
+
+            System.out.println("To continue write \"continue\"");
+            System.out.println("To stop write \"stop\"");
+            scanner = new Scanner(System.in);
+            command = scanner.nextLine();
+        }
+        post.setTags(tags);
+
+        post = postController.save(post);
+        int id = post.getId();
+
+        System.out.println("Id: " + id + "   Content: " + content);
         System.out.println();
     }
 }

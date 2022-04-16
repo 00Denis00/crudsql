@@ -2,16 +2,17 @@ package controller;
 
 import model.Post;
 import repository.Jdbc.JdbcPostRepositoryImpl;
+import repository.PostRepository;
 
 import java.util.List;
 
 public class PostController
 {
-    JdbcPostRepositoryImpl postRepository = new JdbcPostRepositoryImpl(){};
+    PostRepository postRepository = new JdbcPostRepositoryImpl(){};
+
     public Post getById(Integer id)
     {
-        Post post = postRepository.getById(id);
-        return post;
+        return postRepository.getById(id);
     }
     public void deleteById(Integer id)
     {
@@ -19,15 +20,14 @@ public class PostController
     }
     public List<Post> getAll()
     {
-        List<Post> result = postRepository.getAll();
-        return result;
+        return postRepository.getAll();
     }
-    public void save(Post post)
+    public Post save(Post post)
     {
-        postRepository.save(post);
+        return postRepository.save(post);
     }
-    public void update(Post post)
+    public Post update(Post post)
     {
-        postRepository.update(post);
+        return postRepository.update(post);
     }
 }

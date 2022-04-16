@@ -3,8 +3,11 @@ package repository.Jdbc;
 import model.Post;
 import model.Tag;
 import model.Writer;
+import repository.TagRepository;
+import repository.WriterRepository;
 import utils.JdbcUtils;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -15,14 +18,12 @@ public class JdbcWriterRepositoryImpl
     public List<Writer> getAll()
     {
         //Выводит все элементы файла
-        try (Statement statement = JdbcUtils.getStatement())
+        String sql = "SELECT * FROM writers;";
+
+        List<Integer> ids = new ArrayList<>();
+        List<Writer> writers = new ArrayList<>();
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            String sql;
-
-            List<Integer> ids = new ArrayList<>();
-            List<Writer> writers = new ArrayList<>();
-
-            sql = "SELECT * FROM writer;";
             ResultSet rs = statement.executeQuery(sql);
             while (rs.next())
             {
@@ -30,279 +31,225 @@ public class JdbcWriterRepositoryImpl
                 ids.add(id);
             }
 
-            for (int z = 0; z < ids.size(); z++)
-            {
-                int id = ids.get(z);
-                Writer writer = new Writer();
-
-                sql = "SELECT * FROM post WHERE writerId = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                List<Post> posts = new ArrayList<>();
-
-                while(rs.next())
-                {
-                    int ide = rs.getInt("id");
-                    String content = rs.getString("content");
-
-                    Post post = new Post();
-                    post.setId(ide);
-                    post.setContent(content);
-                    posts.add(post);
-                }
-
-                List<Post> result = new ArrayList<>();
-
-                for(int i = 0; i < posts.size(); i++)
-                {
-                    Post post = posts.get(i);
-                    int ide = post.getId();
-
-                    sql = "SELECT * FROM tag WHERE postId = " + ide + ";";
-                    rs = statement.executeQuery(sql);
-
-                    List<Tag> tags = new ArrayList<>();
-
-                    while (rs.next()) {
-                        int idi = rs.getInt("id");
-                        String name = rs.getString("name");
-
-                        Tag tag = new Tag();
-
-                        tag.setId(idi);
-                        tag.setName(name);
-
-                        tags.add(tag);
-                    }
-
-                    post.setTags(tags);
-                    result.add(post);
-                }
-
-                sql = "SELECT * FROM writer WHERE id = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                String writerName = "";
-                while (rs.next())
-                {
-                    writerName = rs.getString("Name");
-                }
-
-                writer.setId(id);
-                writer.setName(writerName);
-                writer.setPosts(result);
-
-                writers.add(writer);
-            }
-
             rs.close();
-
-            return writers;
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             System.out.println(e);
             return null;
         }
+
+        for(int i = 0 ; i < ids.size() ; i++)
+        {
+            int id = ids.get(i);
+
+            Writer writer = new Writer();
+            String name = "";
+            List<Post> posts = new ArrayList<>();
+            Post post = new Post();
+            post.setId(-100);
+            List<Tag> tags = new ArrayList<>();
+            sql = "SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = " + id + " AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;";
+            try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
+            {
+                ResultSet rs = statement.executeQuery();
+                while(rs.next())
+                {
+                    name = rs.getString("writers.name");
+
+                    int postsLastId = post.getId();
+                    int postId = rs.getInt("posts.id");
+
+                    if(postsLastId == postId)
+                    {
+                        int tagId = rs.getInt("tags.id");
+                        String tagName = rs.getString("tags.name");
+                        Tag tag = new Tag();
+                        tag.setId(tagId);
+                        tag.setName(tagName);
+                        tags.add(tag);
+                    }
+                    else if(postsLastId == -100)
+                    {
+                        String postContent = rs.getString("posts.content");
+                        post.setId(postId);
+                        post.setContent(postContent);
+
+                        int tagId = rs.getInt("tags.id");
+                        String tagName = rs.getString("tags.name");
+                        Tag tag = new Tag();
+                        tag.setId(tagId);
+                        tag.setName(tagName);
+                        tags.add(tag);
+                    }
+                    else
+                    {
+                        post.setTags(tags);
+                        tags = new ArrayList<>();
+                        posts.add(post);
+                        post = new Post();
+
+                        String postContent = rs.getString("posts.content");
+                        post.setId(postId);
+                        post.setContent(postContent);
+
+                        int tagId = rs.getInt("tags.id");
+                        String tagName = rs.getString("tags.name");
+                        Tag tag = new Tag();
+                        tag.setId(tagId);
+                        tag.setName(tagName);
+                        tags.add(tag);
+                    }
+                }
+                post.setTags(tags);
+                posts.add(post);
+
+                rs.close();
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+            }
+
+            writer.setId(id);
+            writer.setName(name);
+            writer.setPosts(posts);
+
+            writers.add(writer);
+        }
+        return writers;
     }
 
-    public void save(Writer writer)
+    public Writer save(Writer writer)
     {
         //Создает элемент
-        try (Statement statement = JdbcUtils.getStatement())
+        String name = writer.getName();
+        int id = 0;
+        String sql = "insert into writers(name) values ('" + name + "');";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            String sql;
+            statement.executeUpdate();
 
-            String name = writer.getName();
+            ResultSet rs = statement.getGeneratedKeys();
+            while(rs.next())
+            {
+                id = rs.getInt(1);
+            }
 
-            sql = "insert into writer (name) values ('" + name + "');";
-            statement.executeUpdate(sql);
-
-            System.out.println("Writer was saved");
+            rs.close();
         }
         catch (Exception e)
         {
             System.out.println(e);
         }
+        writer.setId(id);
+        return writer;
     }
 
     public Writer getById(Integer id)
     {
-        //Показывает элемент по ID
-        try (Statement statement = JdbcUtils.getStatement())
+        Writer writer = new Writer();
+        String name = "";
+        List<Post> posts = new ArrayList<>();
+        Post post = new Post();
+        post.setId(-100);
+        List<Tag> tags = new ArrayList<>();
+        String sql = "SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = " + id + " AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            Writer writer = new Writer();
-
-            String sql;
-
-            boolean check = false;
-
-            sql = "SELECT * FROM post WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next())
+            ResultSet rs = statement.executeQuery();
+            while(rs.next())
             {
-                check = true;
-            }
+                name = rs.getString("writers.name");
 
-            if(check == true) {
-                sql = "SELECT * FROM post WHERE writerId = " + id + ";";
-                rs = statement.executeQuery(sql);
+                int postsLastId = post.getId();
+                int postId = rs.getInt("posts.id");
 
-                List<Post> posts = new ArrayList<>();
-
-                while (rs.next()) {
-                    int ide = rs.getInt("id");
-                    String content = rs.getString("content");
-
-                    Post post = new Post();
-                    post.setId(ide);
-                    post.setContent(content);
-                    posts.add(post);
+                if(postsLastId == postId)
+                {
+                    int tagId = rs.getInt("tags.id");
+                    String tagName = rs.getString("tags.name");
+                    Tag tag = new Tag();
+                    tag.setId(tagId);
+                    tag.setName(tagName);
+                    tags.add(tag);
                 }
+                else if(postsLastId == -100)
+                {
+                    String postContent = rs.getString("posts.content");
+                    post.setId(postId);
+                    post.setContent(postContent);
 
-                List<Post> result = new ArrayList<>();
-
-                for (int i = 0; i < posts.size(); i++) {
-                    Post post = posts.get(i);
-                    int ide = post.getId();
-
-                    sql = "SELECT * FROM tag WHERE postId = " + ide + ";";
-                    rs = statement.executeQuery(sql);
-
-                    List<Tag> tags = new ArrayList<>();
-
-                    while (rs.next()) {
-                        int idi = rs.getInt("id");
-                        String name = rs.getString("name");
-
-                        Tag tag = new Tag();
-
-                        tag.setId(idi);
-                        tag.setName(name);
-
-                        tags.add(tag);
-                    }
-
+                    int tagId = rs.getInt("tags.id");
+                    String tagName = rs.getString("tags.name");
+                    Tag tag = new Tag();
+                    tag.setId(tagId);
+                    tag.setName(tagName);
+                    tags.add(tag);
+                }
+                else
+                {
                     post.setTags(tags);
-                    result.add(post);
+                    tags = new ArrayList<>();
+                    posts.add(post);
+                    post = new Post();
+
+                    String postContent = rs.getString("posts.content");
+                    post.setId(postId);
+                    post.setContent(postContent);
+
+                    int tagId = rs.getInt("tags.id");
+                    String tagName = rs.getString("tags.name");
+                    Tag tag = new Tag();
+                    tag.setId(tagId);
+                    tag.setName(tagName);
+                    tags.add(tag);
                 }
-
-                sql = "SELECT * FROM writer WHERE id = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                String writerName = "";
-                while (rs.next()) {
-                    writerName = rs.getString("Name");
-                }
-
-                writer.setId(id);
-                writer.setName(writerName);
-                writer.setPosts(result);
-
-                rs.close();
-
-                return writer;
             }
-            else
-            {
-                System.out.println("There is no writer with that id!");
-                rs.close();
-                return null;
-            }
+            post.setTags(tags);
+            posts.add(post);
+
+            rs.close();
         }
         catch (Exception e)
         {
             System.out.println(e);
-            return null;
         }
+
+        writer.setId(id);
+        writer.setName(name);
+        writer.setPosts(posts);
+        return writer;
     }
 
     public void deleteById(Integer id)
     {
         //Удаляет элемент по ID
-        try (Statement statement = JdbcUtils.getStatement())
+        String sql = "DELETE FROM writers WHERE id = " + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            String sql;
-
-            boolean check = false;
-
-            sql = "SELECT * FROM writer WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next())
-            {
-                check = true;
-            }
-
-            if(check == true) {
-                sql = "SELECT * FROM post WHERE writerId = " + id + ";";
-                rs = statement.executeQuery(sql);
-                List<Integer> list = new ArrayList<>();
-
-                while (rs.next()) {
-                    int ide = rs.getInt("Id");
-                    list.add(ide);
-                }
-
-                for (int i = 0; i < list.size(); i++) {
-                    int ide = list.get(i);
-                    sql = "DELETE FROM tag WHERE postId = " + ide + ";";
-                    statement.executeUpdate(sql);
-                }
-
-                sql = "DELETE FROM post WHERE writerId = " + id + ";";
-                statement.executeUpdate(sql);
-
-                sql = "DELETE FROM writer WHERE id = " + id + ";";
-                statement.executeUpdate(sql);
-            }
-            else
-            {
-                System.out.println("There is no writer with that id!");
-            }
-            rs.close();
-        } catch (Exception e)
-        {
-            System.out.println(e);
-        }
-    }
-
-    public void update(Writer writer)
-    {
-        //Показывает элемент по ID
-        try (Statement statement = JdbcUtils.getStatement())
-        {
-            int id = writer.getId();
-            String name = writer.getName();
-            boolean check = false;
-
-            String sql;
-
-            sql = "SELECT * FROM writer WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-
-            while(rs.next())
-            {
-                check = true;
-            }
-
-            if(check == true) {
-                sql = "DELETE FROM writer WHERE id = " + id + ";";
-                statement.executeUpdate(sql);
-
-                sql = "insert into writer (id, name) values ('" + id + "', '" + name + "');";
-                statement.executeUpdate(sql);
-
-                System.out.println("Writer " + id + " was updated");
-            }
-            else
-            {
-                System.out.println("There is no writer with that id!");
-                System.out.println("Writer wasn't updated");
-            }
-            rs.close();
+            statement.executeUpdate();
         }
         catch (Exception e)
         {
             System.out.println(e);
         }
+    }
+
+    public Writer update(Writer writer)
+    {
+        //Показывает элемент по ID
+        String name = writer.getName();
+        int id = writer.getId();
+        String sql = "UPDATE writers SET name='" + name + "' WHERE id=" + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
+        {
+            statement.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+        return writer;
     }
 }

@@ -11,14 +11,14 @@ import java.util.*;
 
 public class WriterCommander
 {
-    Scanner StrScanner = new Scanner(System.in);
-    Scanner IntScanner = new Scanner(System.in);
+    Scanner scanner = new Scanner(System.in);
     WriterController writerController = new WriterController();
 
     public void getById()
     {
         System.out.println("Enter id: ");
-        Integer id = IntScanner.nextInt();
+        scanner = new Scanner(System.in);
+        Integer id = scanner.nextInt();
         Writer writer = writerController.getById(id);
 
         String name = writer.getName();
@@ -29,17 +29,17 @@ public class WriterCommander
         for(int i = 0; i < posts.size(); i++)
         {
             Post post = posts.get(i);
-            int ide = post.getId();
-            String content = post.getContent();
-            System.out.print("\n[" + ide + ". " + content + "   Tags: ");
+            int postId = post.getId();
+            String postContent = post.getContent();
+            System.out.print("\n[" + postId + ". " + postContent + "   Tags: ");
 
             List<Tag> tags = post.getTags();
             for(int j = 0; j < tags.size(); j++)
             {
                 Tag tag = tags.get(j);
-                int idi = tag.getId();
-                String nm = tag.getName();
-                System.out.print("(Id: " + idi + " ; Name: " + nm + ")");
+                int tagId = tag.getId();
+                String tagName = tag.getName();
+                System.out.print("(Id: " + tagId + " ; Name: " + tagName + ")");
             }
             System.out.print("]");
         }
@@ -49,7 +49,8 @@ public class WriterCommander
     public void deleteById()
     {
         System.out.println("Enter id: ");
-        Integer id = IntScanner.nextInt();
+        scanner = new Scanner(System.in);
+        Integer id = scanner.nextInt();
         writerController.deleteById(id);
         System.out.println("Writer " + id + " was deleted");
         System.out.println();
@@ -72,17 +73,17 @@ public class WriterCommander
             for(int i = 0; i < posts.size(); i++)
             {
                 Post post = posts.get(i);
-                int ide = post.getId();
+                int postId = post.getId();
                 String content = post.getContent();
-                System.out.print("\n[" + ide + ". " + content + "   Tags: ");
+                System.out.print("\n[" + postId + ". " + content + "   Tags: ");
 
                 List<Tag> tags = post.getTags();
                 for(int j = 0; j < tags.size(); j++)
                 {
                     Tag tag = tags.get(j);
-                    int idi = tag.getId();
-                    String nm = tag.getName();
-                    System.out.print("(Id: " + idi + " ; Name: " + nm + ")");
+                    int tagId = tag.getId();
+                    String tagName = tag.getName();
+                    System.out.print("(Id: " + tagId + " ; Name: " + tagName + ")");
                 }
                 System.out.print("]");
             }
@@ -93,13 +94,20 @@ public class WriterCommander
     public void update()
     {
         Writer writer = new Writer();
-        System.out.println("Enter new name: ");
-        String name = StrScanner.nextLine();
-        writer.setName(name);
-        System.out.println("Enter id: ");
-        Integer id = IntScanner.nextInt();
+
+        System.out.println("Enter writer id: ");
+        scanner = new Scanner(System.in);
+        Integer id = scanner.nextInt();
         writer.setId(id);
+
+        System.out.println("Enter new name: ");
+        scanner = new Scanner(System.in);
+        String name = scanner.nextLine();
+        writer.setName(name);
+
         writerController.update(writer);
+
+        System.out.println("Id: " + id + "   Name: " + name);
         System.out.println();
     }
 
@@ -107,10 +115,13 @@ public class WriterCommander
     {
         Writer writer = new Writer();
         System.out.println("Enter name: ");
-        String name = StrScanner.nextLine();
+        scanner = new Scanner(System.in);
+        String name = scanner.nextLine();
         writer.setName(name);
-        writerController.save(writer);
+        writer = writerController.save(writer);
+        int id = writer.getId();
+
+        System.out.println("Id: " + id + "   Name: " + name);
         System.out.println();
     }
-
 }

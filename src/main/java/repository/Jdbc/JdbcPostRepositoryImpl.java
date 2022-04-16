@@ -2,273 +2,179 @@ package repository.Jdbc;
 
 import model.Post;
 import model.Tag;
+import repository.PostRepository;
+import repository.TagRepository;
 import utils.JdbcUtils;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JdbcPostRepositoryImpl
+public class JdbcPostRepositoryImpl implements PostRepository
 {
     public List<Post> getAll()
     {
         //Выводит все элементы файла
-        try (Statement statement = JdbcUtils.getStatement())
+        List<Integer> postIds = new ArrayList<>();
+        String sql = "SELECT * FROM posts;";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            String sql;
-
-            sql = "SELECT * FROM post;";
             ResultSet rs = statement.executeQuery(sql);
-
-            List<Integer> list = new ArrayList<>();
 
             while (rs.next())
             {
                 int id = rs.getInt("Id");
-                list.add(id);
+                postIds.add(id);
             }
-
-            List<Post> result = new ArrayList<>();
-
-            for (int i = 0; i < list.size(); i++)
-            {
-                int id = list.get(i);
-                Post post = new Post();
-
-                sql = "SELECT * FROM post WHERE Id = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                String content = "";
-
-                while (rs.next())
-                {
-                    content = rs.getString("content");
-                }
-
-                sql = "SELECT * FROM tag WHERE postId = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                List<Tag> tags = new ArrayList<>();
-
-                while (rs.next())
-                {
-                    String name = rs.getString("Name");
-                    int ide = rs.getInt("Id");
-
-                    Tag tag = new Tag();
-
-                    tag.setName(name);
-                    tag.setId(ide);
-
-                    tags.add(tag);
-                }
-
-                post.setId(id);
-                post.setContent(content);
-                post.setTags(tags);
-
-                result.add(post);
-            }
-
             rs.close();
-
-            return result;
         }
         catch (Exception e)
         {
             System.out.println(e);
             return null;
         }
+
+        List<Post> posts = new ArrayList<>();
+
+        for (int i = 0; i < postIds.size(); i++)
+        {
+            int id = postIds.get(i);
+            String content = "";
+            List<Tag> tags = new ArrayList<>();
+            sql = "SELECT * FROM posts, post_tags, tags WHERE posts.id = " + id + " AND post_tags.post_id = " + id + " AND tags.id = post_tags.tag_id;";
+            try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
+            {
+                ResultSet rs = statement.executeQuery();
+                while(rs.next())
+                {
+                    content = rs.getString("content");
+
+                    int tagId = rs.getInt("tag_id");
+                    String tagName = rs.getString("name");
+
+                    Tag tag = new Tag();
+                    tag.setId(tagId);
+                    tag.setName(tagName);
+
+                    tags.add(tag);
+                }
+                rs.close();
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+            }
+
+            Post post = new Post();
+            post.setId(id);
+            post.setContent(content);
+            post.setTags(tags);
+            posts.add(post);
+        }
+        return posts;
     }
 
     public Post getById(Integer id)
     {
         //Показывает элемент по ID
-        try (Statement statement = JdbcUtils.getStatement())
+        String content = "";
+        List<Tag> tags = new ArrayList<>();
+        String sql = "SELECT * FROM posts, post_tags, tags WHERE posts.id = " + id + " AND post_tags.post_id = " + id + " AND tags.id = post_tags.tag_id;";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            Post post = new Post();
-
-            String sql;
-
-            boolean check = false;
-
-            sql = "SELECT * FROM post WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next())
+            ResultSet rs = statement.executeQuery();
+            while(rs.next())
             {
-                check = true;
+                content = rs.getString("content");
+
+                int tagId = rs.getInt("tag_id");
+                String tagName = rs.getString("name");
+
+                Tag tag = new Tag();
+                tag.setId(tagId);
+                tag.setName(tagName);
+
+                tags.add(tag);
             }
 
-            if(check == true) {
-                sql = "SELECT * FROM post WHERE Id = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                String content = "";
-
-                while (rs.next()) {
-                    content = rs.getString("content");
-                }
-
-                sql = "SELECT * FROM tag WHERE postId = " + id + ";";
-                rs = statement.executeQuery(sql);
-
-                List<Tag> tags = new ArrayList<>();
-
-                while (rs.next()) {
-                    String name = rs.getString("Name");
-                    int i = rs.getInt("Id");
-
-                    Tag tag = new Tag();
-
-                    tag.setName(name);
-                    tag.setId(i);
-
-                    tags.add(tag);
-                }
-
-                post.setId(id);
-                post.setContent(content);
-                post.setTags(tags);
-
-                rs.close();
-
-                return post;
-            }
-            else
-            {
-                System.out.println("There is no post with that id!");
-                rs.close();
-                return null;
-            }
-        }
-        catch (Exception e)
-        {
-            System.out.println(e);
-            return null;
-        }
-    }
-
-    public void save(Post post)
-    {
-        //Создает элемент
-        try (Statement statement = JdbcUtils.getStatement())
-        {
-            String content = post.getContent();
-            int writerId = post.getWriterId();
-
-            String sql;
-
-            sql = "SELECT * FROM writer;";
-            ResultSet rs = statement.executeQuery(sql);
-
-            List<Integer> list = new ArrayList<>();
-            while (rs.next())
-            {
-                int ide = rs.getInt("id");
-                list.add(ide);
-            }
-
-            boolean coincidence = false;
-
-            for(int i = 0; i < list.size(); i++)
-            {
-                if(writerId == list.get(i))
-                {
-                    coincidence = true;
-                }
-            }
-            if(coincidence == true)
-            {
-                sql = "insert into post (content, writerId) values ('" + content + "', '" + writerId + "');";
-                statement.executeUpdate(sql);
-                System.out.println("Post was saved");
-            }
-            else
-            {
-                System.out.println("There is no writer with this id!");
-                System.out.println("post wasn't saved");
-            }
             rs.close();
         }
         catch (Exception e)
         {
             System.out.println(e);
         }
+
+        Post post = new Post();
+        post.setId(id);
+        post.setContent(content);
+        post.setTags(tags);
+        return post;
+    }
+
+    public Post save(Post post) {
+        //Создает элемент
+        int id = 0;
+        String content = post.getContent();
+        int writerId = post.getWriterId();
+        List<Tag> tags = post.getTags();
+        String sql = "insert into posts(content, writer_id) values ('" + content + "', '" + writerId + "');";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql)) {
+            statement.executeUpdate();
+
+            ResultSet rs = statement.getGeneratedKeys();
+            while (rs.next()) {
+                id = rs.getInt(1);
+            }
+
+            rs.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        post.setId(id);
+
+        for (int i = 0; i < tags.size(); i++) {
+            Tag tag = tags.get(i);
+            int tagId = tag.getId();
+            sql = "insert into post_tags(post_id, tag_id) values (" + id + ", " + tagId + ");";
+            try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql)) {
+                statement.executeUpdate();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+        return post;
     }
 
     public void deleteById(Integer id)
     {
         //Удаляет элемент по ID
-        try (Statement statement = JdbcUtils.getStatement())
+        String sql = "DELETE FROM posts WHERE id = " + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            String sql;
-
-            boolean check = false;
-
-            sql = "SELECT * FROM post WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next())
-            {
-                check = true;
-            }
-
-            if(check == true) {
-                sql = "DELETE FROM post WHERE id = " + id + ";";
-                statement.executeUpdate(sql);
-                sql = "DELETE FROM tag WHERE postId = " + id + ";";
-                statement.executeUpdate(sql);
-            }
-            else
-            {
-                System.out.println("There is no post with that id!");
-            }
-
-            rs.close();
-        } catch (Exception e) {
+            statement.executeUpdate();
+        }
+        catch (Exception e)
+        {
             System.out.println(e);
         }
     }
 
-    public void update(Post post)
+    public Post update(Post post)
     {
-        try (Statement statement = JdbcUtils.getStatement())
+        String content = post.getContent();
+        int id = post.getId();
+        String sql = "UPDATE posts SET content='" + content + "' WHERE id=" + id + ";";
+        try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
-            int id = post.getId();
-            String content = post.getContent();
-
-            String sql;
-
-            boolean check = false;
-            int writerId = 0;
-
-            sql = "SELECT * FROM post WHERE id = " + id + ";";
-            ResultSet rs = statement.executeQuery(sql);
-
-            while (rs.next())
-            {
-                check = true;
-                writerId = rs.getInt("writerId");
-            }
-
-            if(check == true)
-            {
-                sql = "DELETE FROM post WHERE id = " + id + ";";
-                statement.executeUpdate(sql);
-
-                sql = "insert into post (id, content, writerId) values ('" + id + "', '" + content + "', '" + writerId + "');";
-                statement.executeUpdate(sql);
-
-                System.out.println("Post " + id + " was updated");
-            }
-            else
-            {
-                System.out.println("There is no post with that id!");
-                System.out.println("Post wasn't updated");
-            }
-            rs.close();
-        } catch (Exception e) {
+            statement.executeUpdate();
+        }
+        catch (Exception e)
+        {
             System.out.println(e);
         }
+        return post;
     }
 }
+
+
