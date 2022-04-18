@@ -42,7 +42,7 @@ public class JdbcPostRepositoryImpl implements PostRepository
             int id = postIds.get(i);
             String content = "";
             List<Tag> tags = new ArrayList<>();
-            sql = "SELECT * FROM posts, post_tags, tags WHERE posts.id = " + id + " AND post_tags.post_id = " + id + " AND tags.id = post_tags.tag_id;";
+            sql = String.format("SELECT * FROM posts, post_tags, tags WHERE posts.id = %d AND post_tags.post_id = %d AND tags.id = post_tags.tag_id;", id, id);
             try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
             {
                 ResultSet rs = statement.executeQuery();
@@ -80,7 +80,7 @@ public class JdbcPostRepositoryImpl implements PostRepository
         //Показывает элемент по ID
         String content = "";
         List<Tag> tags = new ArrayList<>();
-        String sql = "SELECT * FROM posts, post_tags, tags WHERE posts.id = " + id + " AND post_tags.post_id = " + id + " AND tags.id = post_tags.tag_id;";
+        String sql = String.format("SELECT * FROM posts, post_tags, tags WHERE posts.id = %d AND post_tags.post_id = %d AND tags.id = post_tags.tag_id;", id, id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             ResultSet rs = statement.executeQuery();
@@ -116,9 +116,9 @@ public class JdbcPostRepositoryImpl implements PostRepository
         //Создает элемент
         int id = 0;
         String content = post.getContent();
-        int writerId = post.getWriterId();
+        int writerId = post.getWriter().getId();
         List<Tag> tags = post.getTags();
-        String sql = "insert into posts(content, writer_id) values ('" + content + "', '" + writerId + "');";
+        String sql = String.format("insert into posts(content, writer_id) values ('%s', '%d');", content, writerId);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql)) {
             statement.executeUpdate();
 
@@ -136,7 +136,7 @@ public class JdbcPostRepositoryImpl implements PostRepository
         for (int i = 0; i < tags.size(); i++) {
             Tag tag = tags.get(i);
             int tagId = tag.getId();
-            sql = "insert into post_tags(post_id, tag_id) values (" + id + ", " + tagId + ");";
+            sql = String.format("insert into post_tags(post_id, tag_id) values (%d, %d);", id, tagId);
             try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql)) {
                 statement.executeUpdate();
             } catch (Exception e) {
@@ -149,7 +149,7 @@ public class JdbcPostRepositoryImpl implements PostRepository
     public void deleteById(Integer id)
     {
         //Удаляет элемент по ID
-        String sql = "DELETE FROM posts WHERE id = " + id + ";";
+        String sql = String.format("DELETE FROM posts WHERE id = %d;", id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();
@@ -164,7 +164,7 @@ public class JdbcPostRepositoryImpl implements PostRepository
     {
         String content = post.getContent();
         int id = post.getId();
-        String sql = "UPDATE posts SET content='" + content + "' WHERE id=" + id + ";";
+        String sql = String.format("UPDATE posts SET content='%s' WHERE id=%d;", content, id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();

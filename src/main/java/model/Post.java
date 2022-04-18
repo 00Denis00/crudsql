@@ -7,7 +7,7 @@ public class Post
     private Integer id;
     private String content;
     private List<Tag> tags;
-    private Integer writerId;
+    private Writer writer;
 
     public Integer getId() {
         return id;
@@ -17,12 +17,12 @@ public class Post
         this.id = id;
     }
 
-    public Integer getWriterId() {
-        return writerId;
+    public Writer getWriter() {
+        return writer;
     }
 
-    public void setWriterId(Integer writerId) {
-        this.writerId = writerId;
+    public void setWriter(Writer writer) {
+        this.writer = writer;
     }
 
     public String getContent() {

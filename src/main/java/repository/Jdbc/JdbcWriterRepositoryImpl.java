@@ -13,7 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JdbcWriterRepositoryImpl
+public class JdbcWriterRepositoryImpl implements WriterRepository
 {
     public List<Writer> getAll()
     {
@@ -49,7 +49,7 @@ public class JdbcWriterRepositoryImpl
             Post post = new Post();
             post.setId(-100);
             List<Tag> tags = new ArrayList<>();
-            sql = "SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = " + id + " AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;";
+            sql = String.format("SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = %d AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;", id);
             try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
             {
                 ResultSet rs = statement.executeQuery();
@@ -125,7 +125,7 @@ public class JdbcWriterRepositoryImpl
         //Создает элемент
         String name = writer.getName();
         int id = 0;
-        String sql = "insert into writers(name) values ('" + name + "');";
+        String sql = String.format("insert into writers(name) values ('%s');", name);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();
@@ -154,7 +154,7 @@ public class JdbcWriterRepositoryImpl
         Post post = new Post();
         post.setId(-100);
         List<Tag> tags = new ArrayList<>();
-        String sql = "SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = " + id + " AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;";
+        String sql = String.format("SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = %d AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;", id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             ResultSet rs = statement.executeQuery();
@@ -225,7 +225,7 @@ public class JdbcWriterRepositoryImpl
     public void deleteById(Integer id)
     {
         //Удаляет элемент по ID
-        String sql = "DELETE FROM writers WHERE id = " + id + ";";
+        String sql = String.format("DELETE FROM writers WHERE id = %d;", id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();
@@ -241,7 +241,7 @@ public class JdbcWriterRepositoryImpl
         //Показывает элемент по ID
         String name = writer.getName();
         int id = writer.getId();
-        String sql = "UPDATE writers SET name='" + name + "' WHERE id=" + id + ";";
+        String sql = String.format("UPDATE writers SET name='%s' WHERE id=%d;", name, id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();

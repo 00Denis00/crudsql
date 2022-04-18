@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class TagCommander
 {
-    Scanner scanner;
+    Scanner scanner = new Scanner(System.in);
     TagController tagController = new TagController();
 
     public void getById()

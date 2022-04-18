@@ -3,6 +3,7 @@ package commander;
 import controller.PostController;
 import model.Post;
 import model.Tag;
+import model.Writer;
 
 import java.io.*;
 import java.util.Comparator;
@@ -114,7 +115,9 @@ public class PostCommander
         System.out.println("Enter writer id: ");
         scanner = new Scanner(System.in);
         int writerId = scanner.nextInt();
-        post.setWriterId(writerId);
+        Writer writer = new Writer();
+        writer.setId(writerId);
+        post.setWriter(writer);
 
         System.out.println();
 

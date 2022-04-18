@@ -21,7 +21,7 @@ public class JdbcTagRepositoryImpl implements TagRepository
 
         boolean check = false;
 
-        String sql = "SELECT * FROM tags WHERE id = " + id + ";";
+        String sql = String.format("SELECT * FROM tags WHERE id = %d;", id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             ResultSet rs = statement.executeQuery();
@@ -50,7 +50,7 @@ public class JdbcTagRepositoryImpl implements TagRepository
     public Tag getById(Integer id)
     {
         String name = "";
-        String sql = "SELECT * FROM tags WHERE id = " + id + ";";
+        String sql = String.format("SELECT * FROM tags WHERE id = %d;", id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             ResultSet rs = statement.executeQuery();
@@ -106,7 +106,7 @@ public class JdbcTagRepositoryImpl implements TagRepository
     {
         String name = tag.getName();
         int id = 0;
-        String sql = "insert into tags(name) values ('" + name + "');";
+        String sql = String.format("insert into tags(name) values ('%s');", name);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();
@@ -131,7 +131,7 @@ public class JdbcTagRepositoryImpl implements TagRepository
     {
         String name = tag.getName();
         int id = tag.getId();
-        String sql = "UPDATE tags SET name='" + name + "' WHERE id=" + id + ";";
+        String sql = String.format("UPDATE tags SET name='%s' WHERE id=%d;", name, id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();
@@ -145,7 +145,7 @@ public class JdbcTagRepositoryImpl implements TagRepository
 
     public void deleteById(Integer id)
     {
-        String sql = "DELETE FROM tags WHERE id = " + id + ";";
+        String sql = String.format("DELETE FROM tags WHERE id = %d;", id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             statement.executeUpdate();

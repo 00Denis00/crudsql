@@ -2,12 +2,13 @@ package controller;
 
 import model.Writer;
 import repository.Jdbc.JdbcWriterRepositoryImpl;
+import repository.WriterRepository;
 
 import java.util.List;
 
 public class WriterController
 {
-    JdbcWriterRepositoryImpl writerRepository = new JdbcWriterRepositoryImpl(){};
+    WriterRepository writerRepository = new JdbcWriterRepositoryImpl(){};
 
     public void deleteById(Integer id)
     {
