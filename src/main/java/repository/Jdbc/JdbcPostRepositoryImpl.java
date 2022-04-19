@@ -42,7 +42,7 @@ public class JdbcPostRepositoryImpl implements PostRepository
             int id = postIds.get(i);
             String content = "";
             List<Tag> tags = new ArrayList<>();
-            sql = String.format("SELECT * FROM posts, post_tags, tags WHERE posts.id = %d AND post_tags.post_id = %d AND tags.id = post_tags.tag_id;", id, id);
+            sql = String.format("SELECT * FROM posts JOIN post_tags JOIN tags WHERE posts.id = %d AND post_tags.post_id = %d AND tags.id = post_tags.tag_id;", id, id);
             try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
             {
                 ResultSet rs = statement.executeQuery();
@@ -80,7 +80,7 @@ public class JdbcPostRepositoryImpl implements PostRepository
         //Показывает элемент по ID
         String content = "";
         List<Tag> tags = new ArrayList<>();
-        String sql = String.format("SELECT * FROM posts, post_tags, tags WHERE posts.id = %d AND post_tags.post_id = %d AND tags.id = post_tags.tag_id;", id, id);
+        String sql = String.format("SELECT * FROM posts JOIN post_tags JOIN tags WHERE posts.id = %d AND post_tags.post_id = %d AND tags.id = post_tags.tag_id;", id, id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             ResultSet rs = statement.executeQuery();

@@ -49,7 +49,7 @@ public class JdbcWriterRepositoryImpl implements WriterRepository
             Post post = new Post();
             post.setId(-100);
             List<Tag> tags = new ArrayList<>();
-            sql = String.format("SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = %d AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;", id);
+            sql = String.format("SELECT * FROM writers JOIN posts JOIN post_tags JOIN tags WHERE writers.id = %d AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;", id);
             try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
             {
                 ResultSet rs = statement.executeQuery();
@@ -154,7 +154,7 @@ public class JdbcWriterRepositoryImpl implements WriterRepository
         Post post = new Post();
         post.setId(-100);
         List<Tag> tags = new ArrayList<>();
-        String sql = String.format("SELECT * FROM writers, posts, post_tags, tags WHERE writers.id = %d AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;", id);
+        String sql = String.format("SELECT * FROM writers JOIN posts JOIN post_tags JOIN tags WHERE writers.id = %d AND posts.writer_id = writers.id AND post_tags.post_id = posts.id AND tags.id = post_tags.tag_id ORDER BY posts.id;", id);
         try (PreparedStatement statement = JdbcUtils.getPreparedStatement(sql))
         {
             ResultSet rs = statement.executeQuery();
